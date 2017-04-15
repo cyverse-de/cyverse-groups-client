@@ -1,4 +1,5 @@
 (ns cyverse-groups-client.core
+  (:use [medley.core :only [remove-vals]])
   (:require [cemerick.url :as curl]
             [clj-http.client :as http]
             [clojure.string :as string]))
@@ -76,3 +77,26 @@
 
   (list-subject-groups [_ user subject]
     "Lists groups that a subject belongs to."))
+
+(defn- build-url [base-url & path-elements]
+  (str (apply curl/url base-url path-elements)))
+
+(defn- prepare-opts [opts ks]
+  (remove-vals nil? (select-keys opts ks)))
+
+(defn- folder-name-prefix [environment-name]
+  (format "iplant:de:%s" environment-name))
+
+(deftype CyverseGroupsClient [base-url environment-name]
+  Client
+
+  (get-status [_]
+    (:body (http/get base-url {:as :json})))
+
+  (find-folders [_ user search]
+    (:body (http/get (build-url base-url "folders")
+                     {:query-params {:user user :search search}
+                      :as           :json}))))
+
+(defn new-cyverse-groups-client [base-url environment-name]
+  (CyverseGroupsClient. base-url environment-name))
