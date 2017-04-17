@@ -19,10 +19,10 @@
 (def search-term "e")
 
 (defn- fake-url [& components]
-  (str (apply curl/url fake-base-url components)))
+  (str (apply curl/url fake-base-url (mapv curl/url-encode components))))
 
 (defn- fake-query-url [query & components]
-  (str (assoc (apply curl/url fake-base-url components) :query query)))
+  (str (assoc (apply curl/url fake-base-url (mapv curl/url-encode components)) :query query)))
 
 (defn- create-fake-client []
   (c/new-cyverse-groups-client fake-base-url fake-env))
@@ -76,14 +76,14 @@
     (is (= (c/add-folder (create-fake-client) fake-user "bar:baz:quux" "desc" "disp")
            (create-fake-folder {:name "bar:baz:quux" :description "desc" :display_extension "disp"})))))
 
-(defn delete-folder-response [{:keys [query-string]}]
-  (let [query-params (curl/query->map query-string)]
+(defn delete-folder-response [{:keys [uri]}]
+  (let [name (curl/url-decode (last (string/split uri #"/")))]
     {:status  200
      :headers {"Content-Type" "application/json"}
-     :body    (json/encode (create-fake-folder {:name (get query-params "folder-name") :description ""}))}))
+     :body    (json/encode (create-fake-folder {:name name :description ""}))}))
 
 (deftest test-delete-folder
-  (with-fake-routes {(fake-query-url {:user fake-user :folder-name "baz:quux:blrfl"} "folders")
+  (with-fake-routes {(fake-query-url {:user fake-user} "folders" "baz:quux:blrfl")
                      {:delete delete-folder-response}}
     (is (= (c/delete-folder (create-fake-client) fake-user "baz:quux:blrfl")
            (create-fake-folder {:name "baz:quux:blrfl" :description ""})))))

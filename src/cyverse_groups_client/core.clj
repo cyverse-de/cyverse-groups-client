@@ -79,7 +79,7 @@
     "Lists groups that a subject belongs to."))
 
 (defn- build-url [base-url & path-elements]
-  (str (apply curl/url base-url path-elements)))
+  (str (apply curl/url base-url (mapv curl/url-encode path-elements))))
 
 (defn- prepare-opts [opts ks]
   (remove-vals nil? (select-keys opts ks)))
@@ -111,8 +111,8 @@
                        :as           :json})))
 
   (delete-folder [_ user name]
-    (:body (http/delete (build-url base-url "folders")
-                        {:query-params {:user user :folder-name name}
+    (:body (http/delete (build-url base-url "folders" name)
+                        {:query-params {:user user}
                          :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]
