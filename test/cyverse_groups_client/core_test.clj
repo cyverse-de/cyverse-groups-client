@@ -116,3 +116,28 @@
              (create-fake-folder {:name "a:b:c" :description "foo"})))
       (is (= (c/update-folder client fake-user "a:b:c" {:display_extension "bar"})
              (create-fake-folder {:name "a:b:c" :description "" :display_extension "bar"}))))))
+
+(defn- fake-folder-privilege [folder-fields]
+  {:privileges [{:type "naming"
+                 :name "stem"
+                 :allowed true
+                 :revokable true
+                 :subject {:id fake-user
+                            :name "Resu Ekaf"
+                            :first_name "Resu"
+                            :last_name "Ekaf"
+                            :email "ekaf@example.org"
+                            :institution ""
+                            :source_id "ldap"}
+                 :folder (create-fake-folder folder-fields)}]})
+
+(defn- folder-privilege-response [{:keys [uri]}]
+  (let [name (curl/url-decode (last (butlast (string/split uri #"/"))))]
+    {:status  200
+     :headers {"Content-Type" "application/json"}
+     :body    (json/encode (fake-folder-privilege {:name name :description ""}))}))
+
+(deftest test-folder-privilege-listing
+  (with-fake-routes {(fake-query-url {:user fake-user} "folders" "a:b:c" "privileges") {:get folder-privilege-response}}
+    (is (= (c/list-folder-privileges (create-fake-client) fake-user "a:b:c")
+           (fake-folder-privilege {:name "a:b:c" :description ""})))))

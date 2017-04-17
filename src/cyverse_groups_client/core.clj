@@ -126,6 +126,11 @@
                      {:query-params {:user user}
                       :form-params  (remove-vals nil? (select-keys updates [:name :description :display_extension]))
                       :content-type :json
+                      :as           :json})))
+
+  (list-folder-privileges [_ user name]
+    (:body (http/get (build-url base-url "folders" name "privileges")
+                     {:query-params {:user user}
                       :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]
