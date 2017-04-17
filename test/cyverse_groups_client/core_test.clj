@@ -4,7 +4,8 @@
             [clj-http.fake :refer :all]
             [clojure.string :as string]
             [clojure.test :refer :all]
-            [cyverse-groups-client.core :as c]))
+            [cyverse-groups-client.core :as c]
+            [medley.core :refer [remove-vals]]))
 
 (defn- success-fn
   ([]
@@ -54,3 +55,23 @@
     (with-fake-routes {(fake-query-url query "folders") {:get (success-fn fake-folders)}}
       (is (= (c/find-folders (create-fake-client) fake-user search-term)
              fake-folders)))))
+
+(defn create-fake-folder [{name :name description :description display-extension :display_extension}]
+  (remove-vals nil? {:name              name
+                     :description       description
+                     :display_extension display-extension
+                     :extension         (last (string/split name #":"))
+                     :id_index          "42"
+                     :id                "84"}))
+
+(defn add-folder-response [request]
+  {:status  200
+   :headers {"Content-Type" "application/json"}
+   :body    (json/encode (create-fake-folder (json/decode (slurp (:body request)) true)))})
+
+(deftest test-add-folder
+  (with-fake-routes {(fake-query-url {:user "nobody"} "folders") {:post add-folder-response}}
+    (is (= (c/add-folder (create-fake-client) "nobody" "foo:bar:baz" "A random description")
+           (create-fake-folder {:name "foo:bar:baz" :description "A random description"})))
+    (is (= (c/add-folder (create-fake-client) "nobody" "bar:baz:quux" "desc" "disp")
+           (create-fake-folder {:name "bar:baz:quux" :description "desc" :display_extension "disp"})))))

@@ -12,7 +12,7 @@
   (find-folders [_ user search]
     "Searches for folders by name.")
 
-  (add-folder [_ user name description]
+  (add-folder [_ user name description] [_ user name description display-extension]
     "Creates a new folder.")
 
   (delete-folder [_ user name]
@@ -96,7 +96,19 @@
   (find-folders [_ user search]
     (:body (http/get (build-url base-url "folders")
                      {:query-params {:user user :search search}
-                      :as           :json}))))
+                      :as           :json})))
+
+  (add-folder [self user name description]
+    (add-folder self user name description nil))
+
+  (add-folder [self user name description display-extension]
+    (:body (http/post (build-url base-url "folders")
+                      {:query-params {:user user}
+                       :form-params  (remove-vals nil? {:name              name
+                                                        :description       description
+                                                        :display_extension display-extension})
+                       :content-type :json
+                       :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]
   (CyverseGroupsClient. base-url environment-name))
