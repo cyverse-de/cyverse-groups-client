@@ -70,8 +70,20 @@
    :body    (json/encode (create-fake-folder (json/decode (slurp (:body request)) true)))})
 
 (deftest test-add-folder
-  (with-fake-routes {(fake-query-url {:user "nobody"} "folders") {:post add-folder-response}}
-    (is (= (c/add-folder (create-fake-client) "nobody" "foo:bar:baz" "A random description")
+  (with-fake-routes {(fake-query-url {:user fake-user} "folders") {:post add-folder-response}}
+    (is (= (c/add-folder (create-fake-client) fake-user "foo:bar:baz" "A random description")
            (create-fake-folder {:name "foo:bar:baz" :description "A random description"})))
-    (is (= (c/add-folder (create-fake-client) "nobody" "bar:baz:quux" "desc" "disp")
+    (is (= (c/add-folder (create-fake-client) fake-user "bar:baz:quux" "desc" "disp")
            (create-fake-folder {:name "bar:baz:quux" :description "desc" :display_extension "disp"})))))
+
+(defn delete-folder-response [{:keys [query-string]}]
+  (let [query-params (curl/query->map query-string)]
+    {:status  200
+     :headers {"Content-Type" "application/json"}
+     :body    (json/encode (create-fake-folder {:name (get query-params "folder-name") :description ""}))}))
+
+(deftest test-delete-folder
+  (with-fake-routes {(fake-query-url {:user fake-user :folder-name "baz:quux:blrfl"} "folders")
+                     {:delete delete-folder-response}}
+    (is (= (c/delete-folder (create-fake-client) fake-user "baz:quux:blrfl")
+           (create-fake-folder {:name "baz:quux:blrfl" :description ""})))))

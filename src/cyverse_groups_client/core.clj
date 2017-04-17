@@ -101,14 +101,19 @@
   (add-folder [self user name description]
     (add-folder self user name description nil))
 
-  (add-folder [self user name description display-extension]
+  (add-folder [_ user name description display-extension]
     (:body (http/post (build-url base-url "folders")
                       {:query-params {:user user}
                        :form-params  (remove-vals nil? {:name              name
                                                         :description       description
                                                         :display_extension display-extension})
                        :content-type :json
-                       :as           :json}))))
+                       :as           :json})))
+
+  (delete-folder [_ user name]
+    (:body (http/delete (build-url base-url "folders")
+                        {:query-params {:user user :folder-name name}
+                         :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]
   (CyverseGroupsClient. base-url environment-name))
