@@ -21,8 +21,9 @@
   (get-folder [_ user name]
     "Retrieves information about a folder.")
 
-  (update-folder [_ user name description]
-    "Updates an existing folder.")
+  (update-folder [_ user name updates]
+    "Updates an existing folder. To make calls to this function as clean as possible, the updates are passed in as
+     a map containing three possible elements: `:name`, `:description`, `:display_extension`.")
 
   (list-folder-privileges [_ user name]
     "Lists folder privileges.")
@@ -118,6 +119,13 @@
   (get-folder [_ user name]
     (:body (http/get (build-url base-url "folders" name)
                      {:query-params {:user user}
+                      :as           :json})))
+
+  (update-folder [_ user name updates]
+    (:body (http/put (build-url base-url "folders" name)
+                     {:query-params {:user user}
+                      :form-params  (remove-vals nil? (select-keys updates [:name :description :display_extension]))
+                      :content-type :json
                       :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]

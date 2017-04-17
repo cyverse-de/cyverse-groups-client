@@ -56,7 +56,7 @@
       (is (= (c/find-folders (create-fake-client) fake-user search-term)
              fake-folders)))))
 
-(defn create-fake-folder [{name :name description :description display-extension :display_extension}]
+(defn- create-fake-folder [{name :name description :description display-extension :display_extension}]
   (remove-vals nil? {:name              name
                      :description       description
                      :display_extension display-extension
@@ -64,7 +64,7 @@
                      :id_index          "42"
                      :id                "84"}))
 
-(defn add-folder-response [request]
+(defn- add-folder-response [request]
   {:status  200
    :headers {"Content-Type" "application/json"}
    :body    (json/encode (create-fake-folder (json/decode (slurp (:body request)) true)))})
@@ -76,7 +76,7 @@
     (is (= (c/add-folder (create-fake-client) fake-user "bar:baz:quux" "desc" "disp")
            (create-fake-folder {:name "bar:baz:quux" :description "desc" :display_extension "disp"})))))
 
-(defn folder-response [{:keys [uri]}]
+(defn- folder-response [{:keys [uri]}]
   (let [name (curl/url-decode (last (string/split uri #"/")))]
     {:status  200
      :headers {"Content-Type" "application/json"}
@@ -91,3 +91,28 @@
   (with-fake-routes {(fake-query-url {:user fake-user} "folders" "quux:blrfl:blah") {:get folder-response}}
     (is (= (c/get-folder (create-fake-client) fake-user "quux:blrfl:blah")
            (create-fake-folder {:name "quux:blrfl:blah" :description ""})))))
+
+(defn- update-folder-response [{:keys [uri body]}]
+  (let [name     (curl/url-decode (last (string/split uri #"/")))
+        original (create-fake-folder {:name name :description ""})
+        updates  (json/decode (slurp body) true)
+        updated  (create-fake-folder (select-keys (merge original updates) [:name :description :display_extension]))]
+    {:status  200
+     :headers {"Content-Type" "application/json"}
+     :body    (json/encode updated)}))
+
+(deftest test-update-folder
+  (with-fake-routes {(fake-query-url {:user fake-user} "folders" "a:b:c") {:put update-folder-response}}
+    (let [client (create-fake-client)]
+      (is (= (c/update-folder client fake-user "a:b:c" {:name              "d:e:f"
+                                                        :description       "desc"
+                                                        :display_extension "ext"})
+             (create-fake-folder {:name              "d:e:f"
+                                  :description       "desc"
+                                  :display_extension "ext"})))
+      (is (= (c/update-folder client fake-user "a:b:c" {:name "d:e:f"})
+             (create-fake-folder {:name "d:e:f" :description ""})))
+      (is (= (c/update-folder client fake-user "a:b:c" {:description "foo"})
+             (create-fake-folder {:name "a:b:c" :description "foo"})))
+      (is (= (c/update-folder client fake-user "a:b:c" {:display_extension "bar"})
+             (create-fake-folder {:name "a:b:c" :description "" :display_extension "bar"}))))))
