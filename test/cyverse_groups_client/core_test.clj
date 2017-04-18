@@ -117,27 +117,41 @@
       (is (= (c/update-folder client fake-user "a:b:c" {:display_extension "bar"})
              (create-fake-folder {:name "a:b:c" :description "" :display_extension "bar"}))))))
 
-(defn- fake-folder-privilege [folder-fields]
-  {:privileges [{:type "naming"
-                 :name "stem"
-                 :allowed true
-                 :revokable true
-                 :subject {:id fake-user
-                            :name "Resu Ekaf"
-                            :first_name "Resu"
-                            :last_name "Ekaf"
-                            :email "ekaf@example.org"
-                            :institution ""
-                            :source_id "ldap"}
-                 :folder (create-fake-folder folder-fields)}]})
+(def ^:private fake-privilege
+  {:type "naming"
+   :name "stem"
+   :allowed true
+   :revokable true
+   :subject {:id fake-user
+             :name "Resu Ekaf"
+             :first_name "Resu"
+             :last_name "Ekaf"
+             :email "ekaf@example.org"
+             :institution ""
+             :source_id "ldap"}})
 
-(defn- folder-privilege-response [{:keys [uri]}]
+(defn- privilege-response [_]
+  {:status  200
+   :headers {"Content-Type" "application/json"}
+   :body    (json/encode fake-privilege)})
+
+(defn- fake-folder-privilege [folder-fields]
+  {:privileges [(assoc fake-privilege :folder (create-fake-folder folder-fields))]})
+
+(defn- folder-privileges-response [{:keys [uri]}]
   (let [name (curl/url-decode (last (butlast (string/split uri #"/"))))]
     {:status  200
      :headers {"Content-Type" "application/json"}
      :body    (json/encode (fake-folder-privilege {:name name :description ""}))}))
 
 (deftest test-folder-privilege-listing
-  (with-fake-routes {(fake-query-url {:user fake-user} "folders" "a:b:c" "privileges") {:get folder-privilege-response}}
+  (with-fake-routes {(fake-query-url {:user fake-user} "folders" "a:b:c" "privileges")
+                     {:get folder-privileges-response}}
     (is (= (c/list-folder-privileges (create-fake-client) fake-user "a:b:c")
            (fake-folder-privilege {:name "a:b:c" :description ""})))))
+
+(deftest test-folder-privilege-revocation
+  (with-fake-routes {(fake-query-url {:user fake-user} "folders" "a:b:c" "privileges" "nobody" "naming")
+                     {:delete privilege-response}}
+    (is (= (c/revoke-folder-privilege (create-fake-client) fake-user "a:b:c" "nobody" "naming")
+           fake-privilege))))

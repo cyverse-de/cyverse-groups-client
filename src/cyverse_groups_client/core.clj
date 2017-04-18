@@ -131,7 +131,12 @@
   (list-folder-privileges [_ user name]
     (:body (http/get (build-url base-url "folders" name "privileges")
                      {:query-params {:user user}
-                      :as           :json}))))
+                      :as           :json})))
+
+  (revoke-folder-privilege [_ user name subject privilege]
+    (:body (http/delete (build-url base-url "folders" name "privileges" subject privilege)
+                        {:query-params {:user user}
+                         :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]
   (CyverseGroupsClient. base-url environment-name))
