@@ -82,9 +82,6 @@
 (defn- build-url [base-url & path-elements]
   (str (apply curl/url base-url (mapv curl/url-encode path-elements))))
 
-(defn- prepare-opts [opts ks]
-  (remove-vals nil? (select-keys opts ks)))
-
 (defn- folder-name-prefix [environment-name]
   (format "iplant:de:%s" environment-name))
 
