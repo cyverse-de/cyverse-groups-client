@@ -155,3 +155,9 @@
                      {:delete privilege-response}}
     (is (= (c/revoke-folder-privilege (create-fake-client) fake-user "a:b:c" "nobody" "naming")
            fake-privilege))))
+
+(deftest test-folder-privilege-granting
+  (with-fake-routes {(fake-query-url {:user fake-user} "folders" "a:b:c" "privileges" "nobody" "naming")
+                     {:put privilege-response}}
+    (is (= (c/grant-folder-privilege (create-fake-client) fake-user "a:b:c" "nobody" "naming")
+           fake-privilege))))
