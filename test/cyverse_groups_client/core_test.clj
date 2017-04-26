@@ -17,6 +17,7 @@
 (def fake-env "fake-env")
 (def fake-user "ekaf")
 (def search-term "e")
+(def fake-folder "foo:bar")
 
 (defn- fake-url [& components]
   (str (apply curl/url fake-base-url (mapv curl/url-encode components))))
@@ -161,3 +162,29 @@
                      {:put privilege-response}}
     (is (= (c/grant-folder-privilege (create-fake-client) fake-user "a:b:c" "nobody" "naming")
            fake-privilege))))
+
+(def fake-groups
+  {:groups [{:name              "foo:bar:baz:quux"
+             :type              "role"
+             :display_extension "quux"
+             :display_name      "foo:bar:baz:quux"
+             :extension         "quux"
+             :id_index          "24"
+             :id                "42"}
+            {:name              "foo:bar:baz:blargh"
+             :type              "role"
+             :display_extension "blargh"
+             :display_name      "foo:bar:baz:blargh"
+             :extension         "blargh"
+             :id_index          "27"
+             :id                "72"}]})
+
+(deftest test-find-groups
+  (let [query {:user fake-user :search search-term}]
+    (with-fake-routes {(fake-query-url query "groups") {:get (success-fn fake-groups)}}
+      (is (= (c/find-groups (create-fake-client) fake-user search-term)
+             fake-groups))))
+  (let [query {:user fake-user :search search-term :folder fake-folder}]
+    (with-fake-routes {(fake-query-url query "groups") {:get (success-fn fake-groups)}}
+      (is (= (c/find-groups (create-fake-client) fake-user search-term fake-folder)
+             fake-groups)))))

@@ -138,6 +138,16 @@
   (grant-folder-privilege [_ user name subject privilege]
     (:body (http/put (build-url base-url "folders" name "privileges" subject privilege)
                      {:query-params {:user user}
+                      :as           :json})))
+
+  (find-groups [self user search]
+    (find-groups self user search nil))
+
+  (find-groups [_ user search folder]
+    (:body (http/get (build-url base-url "groups")
+                     {:query-params (remove-vals nil? {:user   user
+                                                       :search search
+                                                       :folder folder})
                       :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]
