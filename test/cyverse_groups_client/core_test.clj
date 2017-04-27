@@ -287,12 +287,14 @@
     (is (= (c/replace-group-members (create-fake-client) fake-user (:name fake-group) [(:id other-fake-subject)])
            (assoc fake-members :members [other-fake-subject])))))
 
+;; The actual service doesn't return a response body, but returning a response body was convenient for testing.
 (deftest test-group-member-removal
   (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "members" (:id fake-subject))
                      {:delete (success-fn {:members []})}}
     (is (= (c/remove-group-member (create-fake-client) fake-user (:name fake-group) (:id fake-subject))
            {:members []}))))
 
+;; The actual service doesn't return a response body, but returning a response body was convenient for testing.
 (deftest test-group-member-addition
   (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "members" (:id other-fake-subject))
                      {:put (success-fn (update-in fake-members [:members] conj other-fake-subject))}}
