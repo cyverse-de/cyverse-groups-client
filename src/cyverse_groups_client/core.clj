@@ -162,7 +162,12 @@
   (delete-group [_ user name]
     (:body (http/delete (build-url base-url "groups" name)
                         {:query-params {:user user}
-                         :as           :json}))))
+                         :as           :json})))
+
+  (get-group [_ user name]
+    (:body (http/get (build-url base-url "groups" name)
+                     {:query-params {:user user}
+                      :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]
   (CyverseGroupsClient. base-url environment-name))

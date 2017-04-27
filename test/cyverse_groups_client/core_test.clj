@@ -213,3 +213,9 @@
     (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name group)) {:delete (success-fn group)}}
       (is (= (c/delete-group (create-fake-client) fake-user (:name group))
              group)))))
+
+(deftest test-get-group
+  (let [group (get-in fake-groups [:groups 0])]
+    (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name group)) {:get (success-fn group)}}
+      (is (= (c/get-group (create-fake-client) fake-user (:name group))
+             group)))))
