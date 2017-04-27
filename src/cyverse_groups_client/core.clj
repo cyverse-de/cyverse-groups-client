@@ -189,6 +189,11 @@
   (grant-group-privilege [_ user name subject privilege]
     (:body (http/put (build-url base-url "groups" name "privileges" subject privilege)
                      {:query-params {:user user}
+                      :as           :json})))
+
+  (list-group-members [_ user name]
+    (:body (http/get (build-url base-url "groups" name "members")
+                     {:query-params {:user user}
                       :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]

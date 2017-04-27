@@ -118,18 +118,21 @@
       (is (= (c/update-folder client fake-user "a:b:c" {:display_extension "bar"})
              (create-fake-folder {:name "a:b:c" :description "" :display_extension "bar"}))))))
 
+(def ^:private fake-subject
+  {:id          fake-user
+   :name        "Resu Ekaf"
+   :first_name  "Resu"
+   :last_name   "Ekaf"
+   :email       "ekaf@example.org"
+   :institution ""
+   :source_id   "ldap"})
+
 (def ^:private fake-privilege
-  {:type "naming"
-   :name "stem"
-   :allowed true
+  {:type      "naming"
+   :name      "stem"
+   :allowed   true
    :revokable true
-   :subject {:id fake-user
-             :name "Resu Ekaf"
-             :first_name "Resu"
-             :last_name "Ekaf"
-             :email "ekaf@example.org"
-             :institution ""
-             :source_id "ldap"}})
+   :subject   fake-subject})
 
 (defn- privilege-response [_]
   {:status  200
@@ -163,7 +166,7 @@
     (is (= (c/grant-folder-privilege (create-fake-client) fake-user "a:b:c" "nobody" "naming")
            fake-privilege))))
 
-(def fake-groups
+(def ^:private fake-groups
   {:groups [{:name              "foo:bar:baz:quux"
              :type              "role"
              :display_extension "quux"
@@ -179,7 +182,7 @@
              :id_index          "27"
              :id                "72"}]})
 
-(def fake-group (get-in fake-groups [:groups 0]))
+(def ^:private fake-group (get-in fake-groups [:groups 0]))
 
 (deftest test-find-groups
   (let [query {:user fake-user :search search-term}]
@@ -239,9 +242,9 @@
       (run-group-update-test group {:display_extension "foo"})
       (run-group-update-test group {:description "This is a somewhat unusual description."}))))
 
-(def fake-group-privilege (assoc fake-privilege :group fake-group))
+(def ^:private fake-group-privilege (assoc fake-privilege :group fake-group))
 
-(def fake-group-privileges {:privileges [fake-group-privilege]})
+(def ^:private fake-group-privileges {:privileges [fake-group-privilege]})
 
 (deftest test-group-privilege-listing
   (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "privileges")
@@ -260,3 +263,11 @@
                      {:put (success-fn fake-privilege)}}
     (is (= (c/grant-group-privilege (create-fake-client) fake-user "a:b:c" fake-user "read")
            fake-privilege))))
+
+(def ^:private fake-members {:members [fake-subject]})
+
+(deftest test-group-member-listing
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "members")
+                     {:get (success-fn fake-members)}}
+    (is (= (c/list-group-members (create-fake-client) fake-user (:name fake-group))
+           fake-members))))
