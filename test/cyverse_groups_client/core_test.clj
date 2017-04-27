@@ -127,6 +127,15 @@
    :institution ""
    :source_id   "ldap"})
 
+(def ^:private other-fake-subject
+  {:id          "other"
+   :name        "Rehto Ekaf"
+   :first_name  "Rehto"
+   :last_name   "Ekaf"
+   :email       "rekaf@example.org"
+   :institution ""
+   :source_id   "ldap"})
+
 (def ^:private fake-privilege
   {:type      "naming"
    :name      "stem"
@@ -271,3 +280,9 @@
                      {:get (success-fn fake-members)}}
     (is (= (c/list-group-members (create-fake-client) fake-user (:name fake-group))
            fake-members))))
+
+(deftest test-group-member-replacement
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "members")
+                     {:put (success-fn (assoc fake-members :members [other-fake-subject]))}}
+    (is (= (c/replace-group-members (create-fake-client) fake-user (:name fake-group) [(:name other-fake-subject)])
+           (assoc fake-members :members [other-fake-subject])))))

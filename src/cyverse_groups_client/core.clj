@@ -194,6 +194,13 @@
   (list-group-members [_ user name]
     (:body (http/get (build-url base-url "groups" name "members")
                      {:query-params {:user user}
+                      :as           :json})))
+
+  (replace-group-members [_ user name subjects]
+    (:body (http/put (build-url base-url "groups" name "members")
+                     {:query-params {:user user}
+                      :form-params  {:members subjects}
+                      :content-type :json
                       :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]
