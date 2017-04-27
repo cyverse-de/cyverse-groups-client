@@ -292,3 +292,9 @@
                      {:delete (success-fn {:members []})}}
     (is (= (c/remove-group-member (create-fake-client) fake-user (:name fake-group) (:id fake-subject))
            {:members []}))))
+
+(deftest test-group-member-addition
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "members" (:id other-fake-subject))
+                     {:put (success-fn (update-in fake-members [:members] conj other-fake-subject))}}
+    (is (= (c/add-group-member (create-fake-client) fake-user (:name fake-group) (:id other-fake-subject))
+           (update-in fake-members [:members] conj other-fake-subject)))))
