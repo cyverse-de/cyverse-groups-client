@@ -219,3 +219,20 @@
     (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name group)) {:get (success-fn group)}}
       (is (= (c/get-group (create-fake-client) fake-user (:name group))
              group)))))
+
+(defn- group-update-response [orig request]
+  {:status  200
+   :headers {"Content-Type" "application/json"}
+   :body    (json/encode (merge orig (json/decode (slurp (:body request)) true)))})
+
+(defn- run-group-update-test [orig updates]
+  (is (= (c/update-group (create-fake-client) fake-user (:name orig) updates)
+         (merge orig updates))))
+
+(deftest test-update-group
+  (let [group (get-in fake-groups [:groups 0])]
+    (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name group))
+                       {:put (partial group-update-response group)}}
+      (run-group-update-test group {:name "bar:baz:quux:blrfl"})
+      (run-group-update-test group {:display_extension "foo"})
+      (run-group-update-test group {:description "This is a somewhat unusual description."}))))

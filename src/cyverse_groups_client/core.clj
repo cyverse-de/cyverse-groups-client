@@ -46,7 +46,7 @@
   (get-group [_ user name]
     "Retrieves information about a group.")
 
-  (update-group [_ user name description]
+  (update-group [_ user name updates]
     "Updates an existing group.")
 
   (list-group-privileges [_ user name]
@@ -167,6 +167,13 @@
   (get-group [_ user name]
     (:body (http/get (build-url base-url "groups" name)
                      {:query-params {:user user}
+                      :as           :json})))
+
+  (update-group [_ user name updates]
+    (:body (http/put (build-url base-url "groups" name)
+                     {:query-params {:user user}
+                      :form-params  (remove-vals nil? (select-keys updates [:name :description :display_extension]))
+                      :content-type :json
                       :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]
