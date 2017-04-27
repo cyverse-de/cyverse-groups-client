@@ -179,6 +179,8 @@
              :id_index          "27"
              :id                "72"}]})
 
+(def fake-group (get-in fake-groups [:groups 0]))
+
 (deftest test-find-groups
   (let [query {:user fake-user :search search-term}]
     (with-fake-routes {(fake-query-url query "groups") {:get (success-fn fake-groups)}}
@@ -209,13 +211,13 @@
                                :description "Some description."})))))
 
 (deftest test-delete-group
-  (let [group (get-in fake-groups [:groups 0])]
+  (let [group fake-group]
     (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name group)) {:delete (success-fn group)}}
       (is (= (c/delete-group (create-fake-client) fake-user (:name group))
              group)))))
 
 (deftest test-get-group
-  (let [group (get-in fake-groups [:groups 0])]
+  (let [group fake-group]
     (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name group)) {:get (success-fn group)}}
       (is (= (c/get-group (create-fake-client) fake-user (:name group))
              group)))))
@@ -230,9 +232,19 @@
          (merge orig updates))))
 
 (deftest test-update-group
-  (let [group (get-in fake-groups [:groups 0])]
+  (let [group fake-group]
     (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name group))
                        {:put (partial group-update-response group)}}
       (run-group-update-test group {:name "bar:baz:quux:blrfl"})
       (run-group-update-test group {:display_extension "foo"})
       (run-group-update-test group {:description "This is a somewhat unusual description."}))))
+
+(def fake-group-privilege (assoc fake-privilege :group fake-group))
+
+(def fake-group-privileges {:privileges [fake-group-privilege]})
+
+(deftest test-group-privilege-listing
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "privileges")
+                     {:get (success-fn fake-group-privileges)}}
+    (is (= (c/list-group-privileges (create-fake-client) fake-user (:name fake-group))
+           fake-group-privileges))))
