@@ -284,5 +284,11 @@
 (deftest test-group-member-replacement
   (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "members")
                      {:put (success-fn (assoc fake-members :members [other-fake-subject]))}}
-    (is (= (c/replace-group-members (create-fake-client) fake-user (:name fake-group) [(:name other-fake-subject)])
+    (is (= (c/replace-group-members (create-fake-client) fake-user (:name fake-group) [(:id other-fake-subject)])
            (assoc fake-members :members [other-fake-subject])))))
+
+(deftest test-group-member-removal
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "members" (:id fake-subject))
+                     {:delete (success-fn {:members []})}}
+    (is (= (c/remove-group-member (create-fake-client) fake-user (:name fake-group) (:id fake-subject))
+           {:members []}))))

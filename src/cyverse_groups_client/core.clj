@@ -201,7 +201,12 @@
                      {:query-params {:user user}
                       :form-params  {:members subjects}
                       :content-type :json
-                      :as           :json}))))
+                      :as           :json})))
+
+  (remove-group-member [_ user name subject]
+    (:body (http/delete (build-url base-url "groups" name "members" subject)
+                        {:query-params {:user user}
+                         :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]
   (CyverseGroupsClient. base-url environment-name))
