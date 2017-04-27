@@ -202,8 +202,14 @@
    :body    (json/encode (create-fake-group (json/decode (slurp (:body request)) true)))})
 
 (deftest test-add-group
-  (with-fake-routes {(fake-query-url {:user fake-user} "groups") add-group-response}
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups") {:post add-group-response}}
     (is (= (c/add-group (create-fake-client) fake-user "foo:bar:baz" "role" "Some description.")
            (create-fake-group {:name        "foo:bar:baz"
                                :type        "role"
                                :description "Some description."})))))
+
+(deftest test-delete-group
+  (let [group (get-in fake-groups [:groups 0])]
+    (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name group)) {:delete (success-fn group)}}
+      (is (= (c/delete-group (create-fake-client) fake-user (:name group))
+             group)))))

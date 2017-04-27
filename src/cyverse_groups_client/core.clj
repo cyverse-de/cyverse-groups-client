@@ -157,7 +157,12 @@
                                                         :type        type
                                                         :description description})
                        :content-type :json
-                       :as           :json}))))
+                       :as           :json})))
+
+  (delete-group [_ user name]
+    (:body (http/delete (build-url base-url "groups" name)
+                        {:query-params {:user user}
+                         :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]
   (CyverseGroupsClient. base-url environment-name))
