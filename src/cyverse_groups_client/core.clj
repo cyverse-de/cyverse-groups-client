@@ -179,7 +179,12 @@
   (list-group-privileges [_ user name]
     (:body (http/get (build-url base-url "groups" name "privileges")
                      {:query-params {:user user}
-                      :as           :json}))))
+                      :as           :json})))
+
+  (revoke-group-privilege [_ user name subject privilege]
+    (:body (http/delete (build-url base-url "groups" name "privileges" subject privilege)
+                        {:query-params {:user user}
+                         :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]
   (CyverseGroupsClient. base-url environment-name))

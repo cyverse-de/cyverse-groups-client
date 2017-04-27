@@ -248,3 +248,9 @@
                      {:get (success-fn fake-group-privileges)}}
     (is (= (c/list-group-privileges (create-fake-client) fake-user (:name fake-group))
            fake-group-privileges))))
+
+(deftest test-group-privilege-revocation
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups" "a:b:c" "privileges" fake-user "read")
+                     {:delete (success-fn fake-privilege)}}
+    (is (= (c/revoke-group-privilege (create-fake-client) fake-user "a:b:c" fake-user "read")
+           fake-privilege))))
