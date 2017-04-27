@@ -188,3 +188,22 @@
     (with-fake-routes {(fake-query-url query "groups") {:get (success-fn fake-groups)}}
       (is (= (c/find-groups (create-fake-client) fake-user search-term fake-folder)
              fake-groups)))))
+
+(defn- create-fake-group [{:keys [name type description]}]
+  (remove-vals nil? {:name        name
+                     :type        type
+                     :description description
+                     :id          "2112"
+                     :id_index    "1812"}))
+
+(defn- add-group-response [request]
+  {:status  200
+   :headers {"Content-Type" "application/json"}
+   :body    (json/encode (create-fake-group (json/decode (slurp (:body request)) true)))})
+
+(deftest test-add-group
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups") add-group-response}
+    (is (= (c/add-group (create-fake-client) fake-user "foo:bar:baz" "role" "Some description.")
+           (create-fake-group {:name        "foo:bar:baz"
+                               :type        "role"
+                               :description "Some description."})))))

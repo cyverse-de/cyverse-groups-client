@@ -148,7 +148,16 @@
                      {:query-params (remove-vals nil? {:user   user
                                                        :search search
                                                        :folder folder})
-                      :as           :json}))))
+                      :as           :json})))
+
+  (add-group [_ user name type description]
+    (:body (http/post (build-url base-url "groups")
+                      {:query-params {:user user}
+                       :form-params  (remove-vals nil? {:name        name
+                                                        :type        type
+                                                        :description description})
+                       :content-type :json
+                       :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]
   (CyverseGroupsClient. base-url environment-name))
