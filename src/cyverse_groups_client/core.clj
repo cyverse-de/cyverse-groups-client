@@ -216,6 +216,11 @@
   (find-subjects [_ user search]
     (:body (http/get (build-url base-url "subjects")
                      {:query-params {:user user :search search}
+                      :as           :json})))
+
+  (get-subject [_ user subject]
+    (:body (http/get (build-url base-url "subjects" subject)
+                     {:query-params {:user user}
                       :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]

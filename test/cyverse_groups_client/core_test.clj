@@ -309,3 +309,8 @@
     (with-fake-routes {(fake-query-url {:user fake-user :search search-term} "subjects") (success-fn fake-subjects)}
       (is (= (c/find-subjects (create-fake-client) fake-user search-term)
              fake-subjects)))))
+
+(deftest test-subject-retrieval
+  (with-fake-routes {(fake-query-url {:user fake-user} "subjects" fake-user) (success-fn fake-subject)}
+    (is (= (c/get-subject (create-fake-client) fake-user fake-user)
+           fake-subject))))
