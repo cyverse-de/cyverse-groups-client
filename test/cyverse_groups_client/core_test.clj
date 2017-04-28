@@ -300,3 +300,12 @@
                      {:put (success-fn (update-in fake-members [:members] conj other-fake-subject))}}
     (is (= (c/add-group-member (create-fake-client) fake-user (:name fake-group) (:id other-fake-subject))
            (update-in fake-members [:members] conj other-fake-subject)))))
+
+(def ^:private fake-subjects
+  {:subjects [fake-subject other-fake-subject]})
+
+(deftest test-subject-search
+  (let [search-term "something"]
+    (with-fake-routes {(fake-query-url {:user fake-user :search search-term} "subjects") (success-fn fake-subjects)}
+      (is (= (c/find-subjects (create-fake-client) fake-user search-term)
+             fake-subjects)))))

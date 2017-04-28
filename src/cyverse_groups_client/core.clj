@@ -211,6 +211,11 @@
   (add-group-member [_ user name subject]
     (:body (http/put (build-url base-url "groups" name "members" subject)
                      {:query-params {:user user}
+                      :as           :json})))
+
+  (find-subjects [_ user search]
+    (:body (http/get (build-url base-url "subjects")
+                     {:query-params {:user user :search search}
                       :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]
