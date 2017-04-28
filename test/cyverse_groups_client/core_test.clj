@@ -306,11 +306,17 @@
 
 (deftest test-subject-search
   (let [search-term "something"]
-    (with-fake-routes {(fake-query-url {:user fake-user :search search-term} "subjects") (success-fn fake-subjects)}
+    (with-fake-routes {(fake-query-url {:user fake-user :search search-term} "subjects")
+                       {:get (success-fn fake-subjects)}}
       (is (= (c/find-subjects (create-fake-client) fake-user search-term)
              fake-subjects)))))
 
 (deftest test-subject-retrieval
-  (with-fake-routes {(fake-query-url {:user fake-user} "subjects" fake-user) (success-fn fake-subject)}
+  (with-fake-routes {(fake-query-url {:user fake-user} "subjects" fake-user) {:get (success-fn fake-subject)}}
     (is (= (c/get-subject (create-fake-client) fake-user fake-user)
            fake-subject))))
+
+(deftest test-subject-group-listing
+  (with-fake-routes {(fake-query-url {:user fake-user} "subjects" fake-user "groups") {:get (success-fn fake-groups)}}
+    (is (= (c/list-subject-groups (create-fake-client) fake-user fake-user)
+           fake-groups))))

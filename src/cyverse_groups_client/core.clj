@@ -221,6 +221,11 @@
   (get-subject [_ user subject]
     (:body (http/get (build-url base-url "subjects" subject)
                      {:query-params {:user user}
+                      :as           :json})))
+
+  (list-subject-groups [_ user subject]
+    (:body (http/get (build-url base-url "subjects" subject "groups")
+                     {:query-params {:user user}
                       :as           :json}))))
 
 (defn new-cyverse-groups-client [base-url environment-name]
