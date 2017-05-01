@@ -46,7 +46,7 @@
   (get-group [_ user name]
     "Retrieves information about a group.")
 
-  (update-group [_ user name description]
+  (update-group [_ user name updates]
     "Updates an existing group.")
 
   (list-group-privileges [_ user name]
@@ -137,6 +137,94 @@
 
   (grant-folder-privilege [_ user name subject privilege]
     (:body (http/put (build-url base-url "folders" name "privileges" subject privilege)
+                     {:query-params {:user user}
+                      :as           :json})))
+
+  (find-groups [self user search]
+    (find-groups self user search nil))
+
+  (find-groups [_ user search folder]
+    (:body (http/get (build-url base-url "groups")
+                     {:query-params (remove-vals nil? {:user   user
+                                                       :search search
+                                                       :folder folder})
+                      :as           :json})))
+
+  (add-group [_ user name type description]
+    (:body (http/post (build-url base-url "groups")
+                      {:query-params {:user user}
+                       :form-params  (remove-vals nil? {:name        name
+                                                        :type        type
+                                                        :description description})
+                       :content-type :json
+                       :as           :json})))
+
+  (delete-group [_ user name]
+    (:body (http/delete (build-url base-url "groups" name)
+                        {:query-params {:user user}
+                         :as           :json})))
+
+  (get-group [_ user name]
+    (:body (http/get (build-url base-url "groups" name)
+                     {:query-params {:user user}
+                      :as           :json})))
+
+  (update-group [_ user name updates]
+    (:body (http/put (build-url base-url "groups" name)
+                     {:query-params {:user user}
+                      :form-params  (remove-vals nil? (select-keys updates [:name :description :display_extension]))
+                      :content-type :json
+                      :as           :json})))
+
+  (list-group-privileges [_ user name]
+    (:body (http/get (build-url base-url "groups" name "privileges")
+                     {:query-params {:user user}
+                      :as           :json})))
+
+  (revoke-group-privilege [_ user name subject privilege]
+    (:body (http/delete (build-url base-url "groups" name "privileges" subject privilege)
+                        {:query-params {:user user}
+                         :as           :json})))
+
+  (grant-group-privilege [_ user name subject privilege]
+    (:body (http/put (build-url base-url "groups" name "privileges" subject privilege)
+                     {:query-params {:user user}
+                      :as           :json})))
+
+  (list-group-members [_ user name]
+    (:body (http/get (build-url base-url "groups" name "members")
+                     {:query-params {:user user}
+                      :as           :json})))
+
+  (replace-group-members [_ user name subjects]
+    (:body (http/put (build-url base-url "groups" name "members")
+                     {:query-params {:user user}
+                      :form-params  {:members subjects}
+                      :content-type :json
+                      :as           :json})))
+
+  (remove-group-member [_ user name subject]
+    (:body (http/delete (build-url base-url "groups" name "members" subject)
+                        {:query-params {:user user}
+                         :as           :json})))
+
+  (add-group-member [_ user name subject]
+    (:body (http/put (build-url base-url "groups" name "members" subject)
+                     {:query-params {:user user}
+                      :as           :json})))
+
+  (find-subjects [_ user search]
+    (:body (http/get (build-url base-url "subjects")
+                     {:query-params {:user user :search search}
+                      :as           :json})))
+
+  (get-subject [_ user subject]
+    (:body (http/get (build-url base-url "subjects" subject)
+                     {:query-params {:user user}
+                      :as           :json})))
+
+  (list-subject-groups [_ user subject]
+    (:body (http/get (build-url base-url "subjects" subject "groups")
                      {:query-params {:user user}
                       :as           :json}))))
 

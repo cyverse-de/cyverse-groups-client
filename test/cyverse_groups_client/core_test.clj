@@ -17,6 +17,7 @@
 (def fake-env "fake-env")
 (def fake-user "ekaf")
 (def search-term "e")
+(def fake-folder "foo:bar")
 
 (defn- fake-url [& components]
   (str (apply curl/url fake-base-url (mapv curl/url-encode components))))
@@ -117,18 +118,30 @@
       (is (= (c/update-folder client fake-user "a:b:c" {:display_extension "bar"})
              (create-fake-folder {:name "a:b:c" :description "" :display_extension "bar"}))))))
 
+(def ^:private fake-subject
+  {:id          fake-user
+   :name        "Resu Ekaf"
+   :first_name  "Resu"
+   :last_name   "Ekaf"
+   :email       "ekaf@example.org"
+   :institution ""
+   :source_id   "ldap"})
+
+(def ^:private other-fake-subject
+  {:id          "other"
+   :name        "Rehto Ekaf"
+   :first_name  "Rehto"
+   :last_name   "Ekaf"
+   :email       "rekaf@example.org"
+   :institution ""
+   :source_id   "ldap"})
+
 (def ^:private fake-privilege
-  {:type "naming"
-   :name "stem"
-   :allowed true
+  {:type      "naming"
+   :name      "stem"
+   :allowed   true
    :revokable true
-   :subject {:id fake-user
-             :name "Resu Ekaf"
-             :first_name "Resu"
-             :last_name "Ekaf"
-             :email "ekaf@example.org"
-             :institution ""
-             :source_id "ldap"}})
+   :subject   fake-subject})
 
 (defn- privilege-response [_]
   {:status  200
@@ -161,3 +174,149 @@
                      {:put privilege-response}}
     (is (= (c/grant-folder-privilege (create-fake-client) fake-user "a:b:c" "nobody" "naming")
            fake-privilege))))
+
+(def ^:private fake-groups
+  {:groups [{:name              "foo:bar:baz:quux"
+             :type              "role"
+             :display_extension "quux"
+             :display_name      "foo:bar:baz:quux"
+             :extension         "quux"
+             :id_index          "24"
+             :id                "42"}
+            {:name              "foo:bar:baz:blargh"
+             :type              "role"
+             :display_extension "blargh"
+             :display_name      "foo:bar:baz:blargh"
+             :extension         "blargh"
+             :id_index          "27"
+             :id                "72"}]})
+
+(def ^:private fake-group (get-in fake-groups [:groups 0]))
+
+(deftest test-find-groups
+  (let [query {:user fake-user :search search-term}]
+    (with-fake-routes {(fake-query-url query "groups") {:get (success-fn fake-groups)}}
+      (is (= (c/find-groups (create-fake-client) fake-user search-term)
+             fake-groups))))
+  (let [query {:user fake-user :search search-term :folder fake-folder}]
+    (with-fake-routes {(fake-query-url query "groups") {:get (success-fn fake-groups)}}
+      (is (= (c/find-groups (create-fake-client) fake-user search-term fake-folder)
+             fake-groups)))))
+
+(defn- create-fake-group [{:keys [name type description]}]
+  (remove-vals nil? {:name        name
+                     :type        type
+                     :description description
+                     :id          "2112"
+                     :id_index    "1812"}))
+
+(defn- add-group-response [request]
+  {:status  200
+   :headers {"Content-Type" "application/json"}
+   :body    (json/encode (create-fake-group (json/decode (slurp (:body request)) true)))})
+
+(deftest test-add-group
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups") {:post add-group-response}}
+    (is (= (c/add-group (create-fake-client) fake-user "foo:bar:baz" "role" "Some description.")
+           (create-fake-group {:name        "foo:bar:baz"
+                               :type        "role"
+                               :description "Some description."})))))
+
+(deftest test-delete-group
+  (let [group fake-group]
+    (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name group)) {:delete (success-fn group)}}
+      (is (= (c/delete-group (create-fake-client) fake-user (:name group))
+             group)))))
+
+(deftest test-get-group
+  (let [group fake-group]
+    (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name group)) {:get (success-fn group)}}
+      (is (= (c/get-group (create-fake-client) fake-user (:name group))
+             group)))))
+
+(defn- group-update-response [orig request]
+  {:status  200
+   :headers {"Content-Type" "application/json"}
+   :body    (json/encode (merge orig (json/decode (slurp (:body request)) true)))})
+
+(defn- run-group-update-test [orig updates]
+  (is (= (c/update-group (create-fake-client) fake-user (:name orig) updates)
+         (merge orig updates))))
+
+(deftest test-update-group
+  (let [group fake-group]
+    (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name group))
+                       {:put (partial group-update-response group)}}
+      (run-group-update-test group {:name "bar:baz:quux:blrfl"})
+      (run-group-update-test group {:display_extension "foo"})
+      (run-group-update-test group {:description "This is a somewhat unusual description."}))))
+
+(def ^:private fake-group-privilege (assoc fake-privilege :group fake-group))
+
+(def ^:private fake-group-privileges {:privileges [fake-group-privilege]})
+
+(deftest test-group-privilege-listing
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "privileges")
+                     {:get (success-fn fake-group-privileges)}}
+    (is (= (c/list-group-privileges (create-fake-client) fake-user (:name fake-group))
+           fake-group-privileges))))
+
+(deftest test-group-privilege-revocation
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups" "a:b:c" "privileges" fake-user "read")
+                     {:delete (success-fn fake-privilege)}}
+    (is (= (c/revoke-group-privilege (create-fake-client) fake-user "a:b:c" fake-user "read")
+           fake-privilege))))
+
+(deftest test-group-privilege-granting
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups" "a:b:c" "privileges" fake-user "read")
+                     {:put (success-fn fake-privilege)}}
+    (is (= (c/grant-group-privilege (create-fake-client) fake-user "a:b:c" fake-user "read")
+           fake-privilege))))
+
+(def ^:private fake-members {:members [fake-subject]})
+
+(deftest test-group-member-listing
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "members")
+                     {:get (success-fn fake-members)}}
+    (is (= (c/list-group-members (create-fake-client) fake-user (:name fake-group))
+           fake-members))))
+
+(deftest test-group-member-replacement
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "members")
+                     {:put (success-fn (assoc fake-members :members [other-fake-subject]))}}
+    (is (= (c/replace-group-members (create-fake-client) fake-user (:name fake-group) [(:id other-fake-subject)])
+           (assoc fake-members :members [other-fake-subject])))))
+
+;; The actual service doesn't return a response body, but returning a response body was convenient for testing.
+(deftest test-group-member-removal
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "members" (:id fake-subject))
+                     {:delete (success-fn {:members []})}}
+    (is (= (c/remove-group-member (create-fake-client) fake-user (:name fake-group) (:id fake-subject))
+           {:members []}))))
+
+;; The actual service doesn't return a response body, but returning a response body was convenient for testing.
+(deftest test-group-member-addition
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "members" (:id other-fake-subject))
+                     {:put (success-fn (update-in fake-members [:members] conj other-fake-subject))}}
+    (is (= (c/add-group-member (create-fake-client) fake-user (:name fake-group) (:id other-fake-subject))
+           (update-in fake-members [:members] conj other-fake-subject)))))
+
+(def ^:private fake-subjects
+  {:subjects [fake-subject other-fake-subject]})
+
+(deftest test-subject-search
+  (let [search-term "something"]
+    (with-fake-routes {(fake-query-url {:user fake-user :search search-term} "subjects")
+                       {:get (success-fn fake-subjects)}}
+      (is (= (c/find-subjects (create-fake-client) fake-user search-term)
+             fake-subjects)))))
+
+(deftest test-subject-retrieval
+  (with-fake-routes {(fake-query-url {:user fake-user} "subjects" fake-user) {:get (success-fn fake-subject)}}
+    (is (= (c/get-subject (create-fake-client) fake-user fake-user)
+           fake-subject))))
+
+(deftest test-subject-group-listing
+  (with-fake-routes {(fake-query-url {:user fake-user} "subjects" fake-user "groups") {:get (success-fn fake-groups)}}
+    (is (= (c/list-subject-groups (create-fake-client) fake-user fake-user)
+           fake-groups))))
