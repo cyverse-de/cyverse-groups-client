@@ -320,3 +320,11 @@
   (with-fake-routes {(fake-query-url {:user fake-user} "subjects" fake-user "groups") {:get (success-fn fake-groups)}}
     (is (= (c/list-subject-groups (create-fake-client) fake-user fake-user)
            fake-groups))))
+
+(deftest test-get-folder-name-prefix
+  (is (= (c/get-folder-name-prefix (create-fake-client))
+         (format "iplant:de:%s" fake-env))))
+
+(deftest test-build-folder-name
+  (is (= (c/build-folder-name (create-fake-client) "users:dennis")
+         (format "iplant:de:%s:users:dennis" fake-env))))

@@ -77,7 +77,13 @@
     "Retrieves information about a subject.")
 
   (list-subject-groups [_ user subject]
-    "Lists groups that a subject belongs to."))
+    "Lists groups that a subject belongs to.")
+
+  (get-folder-name-prefix [_]
+    "Returns the folder name prefix for the environment.")
+
+  (build-folder-name [_ partial-name]
+    "Adds the folder name prefix to the partial folder name given in the argument list."))
 
 (defn- build-url [base-url & path-elements]
   (str (apply curl/url base-url (mapv curl/url-encode path-elements))))
@@ -226,7 +232,13 @@
   (list-subject-groups [_ user subject]
     (:body (http/get (build-url base-url "subjects" subject "groups")
                      {:query-params {:user user}
-                      :as           :json}))))
+                      :as           :json})))
+
+  (get-folder-name-prefix [_]
+    (folder-name-prefix environment-name))
+
+  (build-folder-name [_ partial-name]
+    (format "%s:%s" (folder-name-prefix environment-name) partial-name)))
 
 (defn new-cyverse-groups-client [base-url environment-name]
   (CyverseGroupsClient. base-url environment-name))
