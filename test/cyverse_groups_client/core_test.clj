@@ -164,15 +164,15 @@
            (fake-folder-privilege {:name "a:b:c" :description ""})))))
 
 (deftest test-folder-privilege-revocation
-  (with-fake-routes {(fake-query-url {:user fake-user} "folders" "a:b:c" "privileges" "nobody" "naming")
+  (with-fake-routes {(fake-query-url {:user fake-user} "folders" "a:b:c" "privileges" "nobody" "stem")
                      {:delete privilege-response}}
-    (is (= (c/revoke-folder-privilege (create-fake-client) fake-user "a:b:c" "nobody" "naming")
+    (is (= (c/revoke-folder-privilege (create-fake-client) fake-user "a:b:c" "nobody" "stem")
            fake-privilege))))
 
 (deftest test-folder-privilege-granting
-  (with-fake-routes {(fake-query-url {:user fake-user} "folders" "a:b:c" "privileges" "nobody" "naming")
+  (with-fake-routes {(fake-query-url {:user fake-user} "folders" "a:b:c" "privileges" "nobody" "stem")
                      {:put privilege-response}}
-    (is (= (c/grant-folder-privilege (create-fake-client) fake-user "a:b:c" "nobody" "naming")
+    (is (= (c/grant-folder-privilege (create-fake-client) fake-user "a:b:c" "nobody" "stem")
            fake-privilege))))
 
 (def ^:private fake-groups
