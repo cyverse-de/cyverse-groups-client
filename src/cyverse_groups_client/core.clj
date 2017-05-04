@@ -154,17 +154,19 @@
                      {:query-params {:user user}
                       :as           :json})))
 
-  (revoke-folder-privilege [_ user name subject privilege]
-    (validate-folder-privilege privilege)
-    (:body (http/delete (build-url base-url "folders" name "privileges" subject privilege)
-                        {:query-params {:user user}
-                         :as           :json})))
+  (revoke-folder-privilege [_ user folder-name subject privilege]
+    (let [privilege (name privilege)]
+      (validate-folder-privilege privilege)
+      (:body (http/delete (build-url base-url "folders" folder-name "privileges" subject privilege)
+                          {:query-params {:user user}
+                           :as           :json}))))
 
-  (grant-folder-privilege [_ user name subject privilege]
-    (validate-folder-privilege privilege)
-    (:body (http/put (build-url base-url "folders" name "privileges" subject privilege)
-                     {:query-params {:user user}
-                      :as           :json})))
+  (grant-folder-privilege [_ user folder-name subject privilege]
+    (let [privilege (name privilege)]
+      (validate-folder-privilege privilege)
+      (:body (http/put (build-url base-url "folders" folder-name "privileges" subject privilege)
+                       {:query-params {:user user}
+                        :as           :json}))))
 
   (find-groups [self user search]
     (find-groups self user search nil))
