@@ -104,7 +104,8 @@
 (def ^:private validate-folder-privilege (partial validate-privilege "folder" valid-folder-privileges))
 
 (defn- build-url [base-url & path-elements]
-  (str (apply curl/url base-url (mapv curl/url-encode path-elements))))
+  (let [preprocess-path-element (fn [e] (if (keyword? e) (name e) e))]
+    (str (apply curl/url base-url (mapv (comp curl/url-encode preprocess-path-element) path-elements)))))
 
 (defn- folder-name-prefix [environment-name]
   (format "iplant:de:%s" environment-name))
@@ -155,18 +156,16 @@
                       :as           :json})))
 
   (revoke-folder-privilege [_ user folder-name subject privilege]
-    (let [privilege (name privilege)]
-      (validate-folder-privilege privilege)
-      (:body (http/delete (build-url base-url "folders" folder-name "privileges" subject privilege)
-                          {:query-params {:user user}
-                           :as           :json}))))
+    (validate-folder-privilege privilege)
+    (:body (http/delete (build-url base-url "folders" folder-name "privileges" subject privilege)
+                        {:query-params {:user user}
+                         :as           :json})))
 
   (grant-folder-privilege [_ user folder-name subject privilege]
-    (let [privilege (name privilege)]
-      (validate-folder-privilege privilege)
-      (:body (http/put (build-url base-url "folders" folder-name "privileges" subject privilege)
-                       {:query-params {:user user}
-                        :as           :json}))))
+    (validate-folder-privilege privilege)
+    (:body (http/put (build-url base-url "folders" folder-name "privileges" subject privilege)
+                     {:query-params {:user user}
+                      :as           :json})))
 
   (find-groups [self user search]
     (find-groups self user search nil))
