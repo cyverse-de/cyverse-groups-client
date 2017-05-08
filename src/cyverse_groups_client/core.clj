@@ -85,8 +85,27 @@
   (build-folder-name [_ partial-name]
     "Adds the folder name prefix to the partial folder name given in the argument list."))
 
+(def ^:private valid-folder-privileges
+  {:stem           "Allows users to create subfolders."
+   :create         "Allows users to create a group in a folder."
+   :stemAttrUpdate "Allows users to assign attributes to a folder."
+   :stemAttrRead   "Allows users to read a folder's attributes."})
+
+(defn- invalid-privilege-msg [type valid-privileges privilege]
+  (->> (concat [(str "Invalid " type " privilege: " (name privilege) "\n")
+                (str "Valid " type " privileges:")]
+               (mapv (fn [[k v]] (str "\t" (name k) " - " v)) valid-privileges))
+       (string/join "\n")))
+
+(defn- validate-privilege [type valid-privileges privilege]
+  (when-not (contains? valid-privileges (keyword privilege))
+    (throw (IllegalArgumentException. (invalid-privilege-msg type valid-privileges privilege)))))
+
+(def ^:private validate-folder-privilege (partial validate-privilege "folder" valid-folder-privileges))
+
 (defn- build-url [base-url & path-elements]
-  (str (apply curl/url base-url (mapv curl/url-encode path-elements))))
+  (let [preprocess-path-element (fn [e] (if (keyword? e) (name e) e))]
+    (str (apply curl/url base-url (mapv (comp curl/url-encode preprocess-path-element) path-elements)))))
 
 (defn- folder-name-prefix [environment-name]
   (format "iplant:de:%s" environment-name))
@@ -136,13 +155,15 @@
                      {:query-params {:user user}
                       :as           :json})))
 
-  (revoke-folder-privilege [_ user name subject privilege]
-    (:body (http/delete (build-url base-url "folders" name "privileges" subject privilege)
+  (revoke-folder-privilege [_ user folder-name subject privilege]
+    (validate-folder-privilege privilege)
+    (:body (http/delete (build-url base-url "folders" folder-name "privileges" subject privilege)
                         {:query-params {:user user}
                          :as           :json})))
 
-  (grant-folder-privilege [_ user name subject privilege]
-    (:body (http/put (build-url base-url "folders" name "privileges" subject privilege)
+  (grant-folder-privilege [_ user folder-name subject privilege]
+    (validate-folder-privilege privilege)
+    (:body (http/put (build-url base-url "folders" folder-name "privileges" subject privilege)
                      {:query-params {:user user}
                       :as           :json})))
 
