@@ -64,6 +64,12 @@
   (replace-group-members [_ user name subjects]
     "Removes all existing members from a group and adds new members.")
 
+  (add-group-members [_ user name subjects]
+    "Adds multiple members to a group.")
+
+  (remove-group-members [_ user name subjects]
+    "Removes multiple members from a group.")
+
   (remove-group-member [_ user name subject]
     "Removes a member from a group.")
 
@@ -229,6 +235,20 @@
                       :form-params  {:members subjects}
                       :content-type :json
                       :as           :json})))
+
+  (add-group-members [_ user name subjects]
+    (:body (http/post (build-url base-url "groups" name "members")
+                      {:query-params {:user user}
+                       :form-params  {:members subjects}
+                       :content-type :json
+                       :as           :json})))
+
+  (remove-group-members [_ user name subjects]
+    (:body (http/post (build-url base-url "groups" name "members" "deleter")
+                      {:query-params {:user user}
+                       :form-params  {:members subjects}
+                       :content-type :json
+                       :as           :json})))
 
   (remove-group-member [_ user name subject]
     (:body (http/delete (build-url base-url "groups" name "members" subject)
