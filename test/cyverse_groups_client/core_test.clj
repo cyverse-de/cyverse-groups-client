@@ -281,11 +281,34 @@
     (is (= (c/list-group-members (create-fake-client) fake-user (:name fake-group))
            fake-members))))
 
+(defn- group-member-update-test [expected-ids response-body]
+  (fn [request]
+    (let [{ids :members} (json/decode (slurp (:body request)) true)]
+      (is (= expected-ids ids)))
+    {:status  200
+     :headers {"Content-Type" "application/json"}
+     :body    (json/encode response-body)}))
+
 (deftest test-group-member-replacement
-  (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "members")
-                     {:put (success-fn (assoc fake-members :members [other-fake-subject]))}}
-    (is (= (c/replace-group-members (create-fake-client) fake-user (:name fake-group) [(:id other-fake-subject)])
-           (assoc fake-members :members [other-fake-subject])))))
+  (let [response-body (assoc fake-members :members [other-fake-subject])]
+    (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "members")
+                      {:put (group-member-update-test [(:id other-fake-subject)] response-body)}}
+      (is (= (c/replace-group-members (create-fake-client) fake-user (:name fake-group) [(:id other-fake-subject)])
+             response-body)))))
+
+(deftest test-multiple-group-member-addition
+  (let [response-body (update-in fake-members [:members] conj other-fake-subject)]
+    (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "members")
+                       {:post (group-member-update-test [(:id other-fake-subject)] response-body)}}
+      (is (= (c/add-group-members (create-fake-client) fake-user (:name fake-group) [(:id other-fake-subject)])
+             response-body)))))
+
+(deftest test-multiple-group-member-removal
+  (let [response-body {:members []}]
+    (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "members" "deleter")
+                       (group-member-update-test [(:id other-fake-subject)] response-body)}
+      (is (= (c/remove-group-members (create-fake-client) fake-user (:name fake-group) [(:id other-fake-subject)])
+             response-body)))))
 
 ;; The actual service doesn't return a response body, but returning a response body was convenient for testing.
 (deftest test-group-member-removal
