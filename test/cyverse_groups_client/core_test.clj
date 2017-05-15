@@ -275,6 +275,12 @@
 
 (def ^:private fake-members {:members [fake-subject]})
 
+(deftest test-group-member-listing-by-id
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups" "id" (:id fake-group) "members")
+                     {:get (success-fn fake-members)}}
+    (is (= (c/list-group-members-by-id (create-fake-client) fake-user (:id fake-group))
+           fake-members))))
+
 (deftest test-group-member-listing
   (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "members")
                      {:get (success-fn fake-members)}}
