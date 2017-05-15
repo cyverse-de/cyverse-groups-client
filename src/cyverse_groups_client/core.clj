@@ -58,6 +58,9 @@
   (grant-group-privilege [_ user name subject privilege]
     "Grants group privileges to a subject.")
 
+  (list-group-members-by-id [_ user group-id]
+    "Lists the members of the group with the given identifier.")
+
   (list-group-members [_ user name]
     "Lists group members.")
 
@@ -221,6 +224,11 @@
 
   (grant-group-privilege [_ user name subject privilege]
     (:body (http/put (build-url base-url "groups" name "privileges" subject privilege)
+                     {:query-params {:user user}
+                      :as           :json})))
+
+  (list-group-members-by-id [_ user group-id]
+    (:body (http/get (build-url base-url "groups" "id" group-id "members")
                      {:query-params {:user user}
                       :as           :json})))
 
