@@ -4,6 +4,8 @@
             [clj-http.client :as http]
             [clojure.string :as string]))
 
+(def public-user "GrouperAll")
+
 (defprotocol Client
   "A client library for the CyVerse Groups API."
   (get-status [_]
