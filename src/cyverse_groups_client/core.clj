@@ -87,7 +87,7 @@
   (get-subject [_ user subject]
     "Retrieves information about a subject.")
 
-  (list-subject-groups [_ user subject]
+  (list-subject-groups [_ user subject] [_ user subject params]
     "Lists groups that a subject belongs to.")
 
   (get-folder-name-prefix [_]
@@ -283,6 +283,11 @@
   (list-subject-groups [_ user subject]
     (:body (http/get (build-url base-url "subjects" subject "groups")
                      {:query-params {:user user}
+                      :as           :json})))
+
+  (list-subject-groups [_ user subject folder]
+    (:body (http/get (build-url base-url "subjects" subject "groups")
+                     {:query-params {:user user :folder folder}
                       :as           :json})))
 
   (get-folder-name-prefix [_]
