@@ -261,6 +261,22 @@
     (is (= (c/list-group-privileges (create-fake-client) fake-user (:name fake-group))
            fake-group-privileges))))
 
+(defn- group-privilege-update-test [expected-updates response-body]
+  (fn [request]
+    (is (= expected-updates (json/decode (slurp (:body request)) true)))
+    {:status  200
+     :headers {"Content-Type" "application/json"}
+     :body    (json/encode response-body)}))
+
+(def ^:private fake-privilege-updates
+  {:updates [{:subject_id fake-user :privileges ["read" "view"]}]})
+
+(deftest test-group-privilege-update
+  (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "privileges")
+                     {:post (group-privilege-update-test fake-privilege-updates fake-group-privileges)}}
+    (is (= (c/update-group-privileges (create-fake-client) fake-user (:name fake-group) fake-privilege-updates)
+           fake-group-privileges))))
+
 (deftest test-group-privilege-revocation
   (with-fake-routes {(fake-query-url {:user fake-user} "groups" "a:b:c" "privileges" fake-user "read")
                      {:delete (success-fn fake-privilege)}}

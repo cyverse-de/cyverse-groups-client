@@ -54,6 +54,10 @@
   (list-group-privileges [_ user name]
     "Lists group privileges.")
 
+  (update-group-privileges [_ user name updates]
+    "Sets group privileges for multiple subjects. The updates argument is in the same format as the request body
+     for the endpoint. Please see the README.md file for more details.")
+
   (revoke-group-privilege [_ user name subject privilege]
     "Revokes group privileges from a subject.")
 
@@ -218,6 +222,13 @@
     (:body (http/get (build-url base-url "groups" name "privileges")
                      {:query-params {:user user}
                       :as           :json})))
+
+  (update-group-privileges [_ user name updates]
+    (:body (http/post (build-url base-url "groups" name "privileges")
+                      {:query-params {:user user}
+                       :form-params  updates
+                       :content-type :json
+                       :as           :json})))
 
   (revoke-group-privilege [_ user name subject privilege]
     (:body (http/delete (build-url base-url "groups" name "privileges" subject privilege)
