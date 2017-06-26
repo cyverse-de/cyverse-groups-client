@@ -54,7 +54,7 @@
   (list-group-privileges [_ user name]
     "Lists group privileges.")
 
-  (update-group-privileges [_ user name updates]
+  (update-group-privileges [_ user name updates] [_ user name updates params]
     "Sets group privileges for multiple subjects. The updates argument is in the same format as the request body
      for the endpoint. Please see the README.md file for more details.")
 
@@ -223,9 +223,12 @@
                      {:query-params {:user user}
                       :as           :json})))
 
-  (update-group-privileges [_ user name updates]
+  (update-group-privileges [this user name updates]
+    (update-group-privileges this user name updates {}))
+
+  (update-group-privileges [_ user name updates params]
     (:body (http/post (build-url base-url "groups" name "privileges")
-                      {:query-params {:user user}
+                      {:query-params (assoc params :user user)
                        :form-params  updates
                        :content-type :json
                        :as           :json})))
