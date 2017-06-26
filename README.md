@@ -72,6 +72,12 @@ A client library for the CyVerse groups service.
 ;; List group privileges.
 (c/list-group-privileges client "username" "some:group:name")
 
+;; Update group privileges for several users.
+(c/update-group-privileges client "username" "some:group_name" {:updates [{:subject_id "subject"
+                                                                           :privileges ["optin"]}
+                                                                          {:subject_id "subject1"
+                                                                           :privileges ["reaad" "optin"]}]})
+
 ;; Revoke group privileges.
 (c/revoke-group-privilege client "username" "some:group:name" "subject" "privilege")
 
