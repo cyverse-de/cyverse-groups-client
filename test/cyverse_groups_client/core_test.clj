@@ -275,6 +275,11 @@
   (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "privileges")
                      {:post (group-privilege-update-test fake-privilege-updates fake-group-privileges)}}
     (is (= (c/update-group-privileges (create-fake-client) fake-user (:name fake-group) fake-privilege-updates)
+           fake-group-privileges)))
+  (with-fake-routes {(fake-query-url {:user fake-user :replace "true"} "groups" (:name fake-group) "privileges")
+                     {:post (group-privilege-update-test fake-privilege-updates fake-group-privileges)}}
+    (is (= (c/update-group-privileges (create-fake-client) fake-user (:name fake-group) fake-privilege-updates
+                                      {:replace "true"})
            fake-group-privileges))))
 
 (deftest test-group-privilege-revocation
