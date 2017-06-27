@@ -58,6 +58,10 @@
     "Sets group privileges for multiple subjects. The updates argument is in the same format as the request body
      for the endpoint. Please see the README.md file for more details.")
 
+  (revoke-group-privileges [_ user name updates]
+    "Revokes group privileges for multiple subjects. The updates argument is in the same format as the request body
+     for the endpoint. Please see the README.md file for more details.")
+
   (revoke-group-privilege [_ user name subject privilege]
     "Revokes group privileges from a subject.")
 
@@ -229,6 +233,13 @@
   (update-group-privileges [_ user name updates params]
     (:body (http/post (build-url base-url "groups" name "privileges")
                       {:query-params (assoc params :user user)
+                       :form-params  updates
+                       :content-type :json
+                       :as           :json})))
+
+  (revoke-group-privileges [_ user name updates]
+    (:body (http/post (build-url base-url "groups" name "privileges" "deleter")
+                      {:query-params {:user user}
                        :form-params  updates
                        :content-type :json
                        :as           :json})))
