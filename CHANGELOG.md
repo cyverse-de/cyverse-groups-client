@@ -13,7 +13,7 @@ of [keepachangelog.com](http://keepachangelog.com/).
 ### Added
 - An additional arity for `update-group-privileges` that accepts additional parameters for the request.
 
-## [0.1.0]
+## 0.1.0
 ### Initial Release
 
 [Unreleased]: https://github.com/cyverse-de/cyverse-groups-client/compare/0.1.2...HEAD
