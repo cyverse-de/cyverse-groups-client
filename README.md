@@ -118,4 +118,4 @@ A client library for the CyVerse groups service.
 
 ## License
 
-http://www.cyverse.org/sites/default/files/iPLANT-LICENSE.txt
+http://www.cyverse.org/sites/default/files/CyVerse-LICENSE.txt
