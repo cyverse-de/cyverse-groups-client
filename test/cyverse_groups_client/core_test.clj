@@ -261,6 +261,13 @@
     (is (= (c/list-group-privileges (create-fake-client) fake-user (:name fake-group))
            fake-group-privileges))))
 
+(deftest test-filtered-group-privilege-listing
+  (let [params {:user fake-user :privilege "foo" :subject-id "bar" :subject-source-id "baz"}]
+    (with-fake-routes {(fake-query-url params "groups" (:name fake-group) "privileges")
+                       {:get (success-fn fake-group-privileges)}}
+      (is (= (c/list-group-privileges (create-fake-client) fake-user (:name fake-group) params)
+             fake-group-privileges)))))
+
 (defn- group-privilege-update-test [expected-updates response-body]
   (fn [request]
     (is (= expected-updates (json/decode (slurp (:body request)) true)))
