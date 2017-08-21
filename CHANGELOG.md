@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file. This change log follows the conventions
 of [keepachangelog.com](http://keepachangelog.com/).
 
+## [Unreleased]
+### Added
+- An additional arity for `list-group-privileges` that allows privileges to be filtered by privilege name, subject
+  ID, subject type ID, or any combination thereof.
+
 ## [0.1.2]
 ### Added
 - An additional arity for `revoke-group-privileges` that allows privileges to be revoked for several users in a single

@@ -51,7 +51,7 @@
   (update-group [_ user name updates]
     "Updates an existing group.")
 
-  (list-group-privileges [_ user name]
+  (list-group-privileges [_ user name] [_ user name params]
     "Lists group privileges.")
 
   (update-group-privileges [_ user name updates] [_ user name updates params]
@@ -222,10 +222,14 @@
                       :content-type :json
                       :as           :json})))
 
-  (list-group-privileges [_ user name]
-    (:body (http/get (build-url base-url "groups" name "privileges")
-                     {:query-params {:user user}
-                      :as           :json})))
+  (list-group-privileges [self user name]
+    (list-group-privileges self user name {}))
+
+  (list-group-privileges [_ user name params]
+    (let [accepted-params [:privilege :subject-id :subject-source-id]]
+      (:body (http/get (build-url base-url "groups" name "privileges")
+                       {:query-params (merge {:user user} (select-keys params accepted-params))
+                        :as           :json}))))
 
   (update-group-privileges [this user name updates]
     (update-group-privileges this user name updates {}))
