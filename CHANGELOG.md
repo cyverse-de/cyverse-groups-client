@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file. This change
 of [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- A new parameter, `inheritance-level`, to `list-group-privileges` that allows privileges to be filtered by whether
+  they're assigned directly or indirectly to a subject.
 
 ## [0.1.3]
 ### Added

@@ -226,7 +226,7 @@
     (list-group-privileges self user name {}))
 
   (list-group-privileges [_ user name params]
-    (let [accepted-params [:privilege :subject-id :subject-source-id]]
+    (let [accepted-params [:privilege :subject-id :subject-source-id :inheritance-level]]
       (:body (http/get (build-url base-url "groups" name "privileges")
                        {:query-params (merge {:user user} (select-keys params accepted-params))
                         :as           :json}))))
