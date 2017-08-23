@@ -74,7 +74,8 @@ A client library for the CyVerse groups service.
 (c/list-group-privileges client "username" "some:group:name"
                          {:privilege         "privilege-name"
                           :subject-id        "subject-id"
-                          :subject-source-id "subject-source-id"})
+                          :subject-source-id "subject-source-id"
+                          :inheritance-level "immediate"})
 
 ;; Update group privileges for several users.
 (c/update-group-privileges client "username" "some:group:name" {:updates [{:subject_id "subject"

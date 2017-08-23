@@ -262,7 +262,11 @@
            fake-group-privileges))))
 
 (deftest test-filtered-group-privilege-listing
-  (let [params {:user fake-user :privilege "foo" :subject-id "bar" :subject-source-id "baz"}]
+  (let [params {:user              fake-user
+                :privilege         "foo"
+                :subject-id        "bar"
+                :subject-source-id "baz"
+                :inheritance-level "immediate"}]
     (with-fake-routes {(fake-query-url params "groups" (:name fake-group) "privileges")
                        {:get (success-fn fake-group-privileges)}}
       (is (= (c/list-group-privileges (create-fake-client) fake-user (:name fake-group) params)
