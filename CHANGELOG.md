@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file. This change
 of [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.1.5]
 ### Added
 - A new function `lookup-subjects` that can be used to look up multiple subjects by ID.
 
@@ -30,7 +32,8 @@ of [keepachangelog.com](http://keepachangelog.com/).
 ## 0.1.0
 ### Initial Release
 
-[Unreleased]: https://github.com/cyverse-de/cyverse-groups-client/compare/0.1.4...HEAD
+[Unreleased]: https://github.com/cyverse-de/cyverse-groups-client/compare/0.1.5...HEAD
+[0.1.5]: https://github.com/cyverse-de/cyverse-groups-client/compare/0.1.4...0.1.5
 [0.1.4]: https://github.com/cyverse-de/cyverse-groups-client/compare/0.1.3...0.1.4
 [0.1.3]: https://github.com/cyverse-de/cyverse-groups-client/compare/0.1.2...0.1.3
 [0.1.2]: https://github.com/cyverse-de/cyverse-groups-client/compare/0.1.1...0.1.2
