@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file. This change
 of [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- A new function `lookup-subjects` that can be used to look up multiple subjects by ID.
 
 ## [0.1.4]
 ### Added

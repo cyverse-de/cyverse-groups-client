@@ -117,6 +117,9 @@ A client library for the CyVerse groups service.
 ;; Find subjects.
 (c/find-subjects client "username" "search-string")
 
+;; Look up subjects.
+(c/lookup-subjects client "username" ["subject1", "subject2"])
+
 ;; Get information about a specific subject.
 (c/get-subject client "username" "subject")
 ```
