@@ -92,6 +92,9 @@
   (find-subjects [_ user search]
     "Finds subjects by name.")
 
+  (lookup-subjects [_ user subjects]
+    "Looks up one or more subjects by ID.")
+
   (get-subject [_ user subject]
     "Retrieves information about a subject.")
 
@@ -303,6 +306,13 @@
     (:body (http/get (build-url base-url "subjects")
                      {:query-params {:user user :search search}
                       :as           :json})))
+
+  (lookup-subjects [_ user subjects]
+    (:body (http/post (build-url base-url "subjects" "lookup")
+                      {:query-params {:user user}
+                       :form-params  {:subject_ids subjects}
+                       :content-type :json
+                       :as           :json})))
 
   (get-subject [_ user subject]
     (:body (http/get (build-url base-url "subjects" subject)

@@ -371,11 +371,26 @@
 (def ^:private fake-subjects
   {:subjects [fake-subject other-fake-subject]})
 
+(defn- subject-lookup-test [expected-ids response-body]
+  (fn [request]
+    (let [{ids :subject_ids} (json/decode (slurp (:body request)) true)]
+      (is (= expected-ids ids)))
+    {:status  200
+     :headers {"Content-Type" "application/json"}
+     :body    (json/encode response-body)}))
+
 (deftest test-subject-search
   (let [search-term "something"]
     (with-fake-routes {(fake-query-url {:user fake-user :search search-term} "subjects")
                        {:get (success-fn fake-subjects)}}
       (is (= (c/find-subjects (create-fake-client) fake-user search-term)
+             fake-subjects)))))
+
+(deftest test-subject-lookup
+  (let [subject-ids [fake-user "other"]]
+    (with-fake-routes {(fake-query-url {:user fake-user} "subjects" "lookup")
+                       {:post (subject-lookup-test subject-ids fake-subjects)}}
+      (is (= (c/lookup-subjects (create-fake-client) fake-user subject-ids)
              fake-subjects)))))
 
 (deftest test-subject-retrieval
