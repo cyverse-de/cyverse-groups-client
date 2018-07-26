@@ -319,10 +319,22 @@
     (is (= (c/list-group-members-by-id (create-fake-client) fake-user (:id fake-group))
            fake-members))))
 
+(deftest test-group-member-filter-listing-by-id
+  (with-fake-routes {(fake-query-url {:user fake-user :member-filter "all"} "groups" "id" (:id fake-group) "members")
+                     {:get (success-fn fake-members)}}
+    (is (= (c/list-group-members-by-id (create-fake-client) fake-user (:id fake-group) {:member-filter "all"})
+           fake-members))))
+
 (deftest test-group-member-listing
   (with-fake-routes {(fake-query-url {:user fake-user} "groups" (:name fake-group) "members")
                      {:get (success-fn fake-members)}}
     (is (= (c/list-group-members (create-fake-client) fake-user (:name fake-group))
+           fake-members))))
+
+(deftest test-group-member-filter-listing
+  (with-fake-routes {(fake-query-url {:user fake-user :member-filter "all"} "groups" (:name fake-group) "members")
+                     {:get (success-fn fake-members)}}
+    (is (= (c/list-group-members (create-fake-client) fake-user (:name fake-group) {:member-filter "all"})
            fake-members))))
 
 (defn- group-member-update-test [expected-ids response-body]

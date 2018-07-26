@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file. This change
 of [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- A new arity for `list-group-members-by-id` that can be used to pass in optional parameters.
+- A new arity for `list-group-members` that can be used to pass in optional parameters.
+- Support for the optional `member-filter` parameter in `list-group-members-by-id`.
+- Support for the optional `member-filter` parameter in `list-group-members`.
 
 ## [0.1.5]
 ### Added
