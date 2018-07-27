@@ -68,10 +68,10 @@
   (grant-group-privilege [_ user name subject privilege]
     "Grants group privileges to a subject.")
 
-  (list-group-members-by-id [_ user group-id]
+  (list-group-members-by-id [_ user group-id] [_ user group-id params]
     "Lists the members of the group with the given identifier.")
 
-  (list-group-members [_ user name]
+  (list-group-members [_ user name] [_ user name params]
     "Lists group members.")
 
   (replace-group-members [_ user name subjects]
@@ -261,15 +261,25 @@
                      {:query-params {:user user}
                       :as           :json})))
 
-  (list-group-members-by-id [_ user group-id]
-    (:body (http/get (build-url base-url "groups" "id" group-id "members")
-                     {:query-params {:user user}
-                      :as           :json})))
+  (list-group-members-by-id [self user group-id]
+    (list-group-members-by-id self user group-id {}))
 
-  (list-group-members [_ user name]
-    (:body (http/get (build-url base-url "groups" name "members")
-                     {:query-params {:user user}
-                      :as           :json})))
+  (list-group-members-by-id [_ user group-id params]
+    (let [accepted-params [:member-filter]]
+      (:body (http/get (build-url base-url "groups" "id" group-id "members")
+                       {:query-params (merge {:user user}
+                                             (remove-vals nil? (select-keys params accepted-params)))
+                        :as           :json}))))
+
+  (list-group-members [self user name]
+    (list-group-members self user name {}))
+
+  (list-group-members [_ user name params]
+    (let [accepted-params [:member-filter]]
+      (:body (http/get (build-url base-url "groups" name "members")
+                       {:query-params (merge {:user user}
+                                             (remove-vals nil? (select-keys params accepted-params)))
+                        :as           :json}))))
 
   (replace-group-members [_ user name subjects]
     (:body (http/put (build-url base-url "groups" name "members")

@@ -104,6 +104,17 @@ A client library for the CyVerse groups service.
 
 ;; List the members of a group.
 (c/list-group-members client "username" "some:group:name")
+(c/list-group-members client "username" "some:group:name" {:member-filter "all"})
+(c/list-group-members client "username" "some:group:name" {:member-filter "immediate"})
+(c/list-group-members client "username" "some:group:name" {:member-filter "composite"})
+(c/list-group-members client "username" "some:group:name" {:member-filter "effective"})
+
+;; List the members of a group by ID.
+(c/list-group-members-by-id client "username" "thegroupid")
+(c/list-group-members-by-id client "username" "thegroupid" {:member-filter "all"})
+(c/list-group-members-by-id client "username" "thegroupid" {:member-filter "immediate"})
+(c/list-group-members-by-id client "username" "thegroupid" {:member-filter "composite"})
+(c/list-group-members-by-id client "username" "thegroupid" {:member-filter "effective"})
 
 ;; Replace all members of a group.
 (c/replace-group-members client "username" "some:group:name" ["subject1", "subject2"])
