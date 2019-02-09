@@ -133,6 +133,14 @@ A client library for the CyVerse groups service.
 
 ;; Get information about a specific subject.
 (c/get-subject client "username" "subject")
+
+;; List privileges granted to a subject.
+(c/list-subject-privileges client "username" "subject")
+(c/list-subject-privileges client "username" "subject" {:inheritance-level "inherited"})
+(c/list-subject-privileges client "username" "subject" {:inheritance-level "immediate"})
+(c/list-subject-privileges client "username" "subject" {:entity-type "folder"})
+(c/list-subject-privileges client "username" "subject" {:entity-type "group"})
+(c/list-subject-privileges client "username" "subject" {:folder "some:folder:name"})
 ```
 
 ## License

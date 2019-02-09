@@ -421,6 +421,44 @@
     (is (= (c/list-subject-groups (create-fake-client) fake-user fake-user fake-folder)
            fake-groups))))
 
+(defn- fake-subject-privileges []
+  {:privileges [(assoc fake-privilege
+                  :folder (create-fake-folder {:name        "foo:bar:baz"
+                                               :description ""}))
+                (assoc fake-privilege
+                  :group (create-fake-group {:name        "foo:bar:baz"
+                                             :type        "role"
+                                             :description "Some description."}))]})
+
+(defn- subject-privileges-response [_]
+  {:status  200
+   :headers {"Content-Type" "application/json"}
+   :body    (json/encode (fake-subject-privileges))})
+
+(deftest test-subject-privilege-listing
+  (with-fake-routes {(fake-query-url {:user fake-user} "subjects" fake-user "privileges")
+                     {:get subject-privileges-response}}
+    (is (= (c/list-subject-privileges (create-fake-client) fake-user fake-user)
+           (fake-subject-privileges)))))
+
+(deftest test-subject-privilege-inheritance-level-listing
+  (with-fake-routes {(fake-query-url {:user fake-user :inheritance-level "inherited"} "subjects" fake-user "privileges")
+                     {:get subject-privileges-response}}
+    (is (= (c/list-subject-privileges (create-fake-client) fake-user fake-user {:inheritance-level "inherited"})
+           (fake-subject-privileges)))))
+
+(deftest test-subject-privilege-entity-type-listing
+  (with-fake-routes {(fake-query-url {:user fake-user :entity-type "group"} "subjects" fake-user "privileges")
+                     {:get subject-privileges-response}}
+    (is (= (c/list-subject-privileges (create-fake-client) fake-user fake-user {:entity-type "group"})
+           (fake-subject-privileges)))))
+
+(deftest test-subject-privilege-folder-listing
+  (with-fake-routes {(fake-query-url {:user fake-user :folder "foo:bar"} "subjects" fake-user "privileges")
+                     {:get subject-privileges-response}}
+    (is (= (c/list-subject-privileges (create-fake-client) fake-user fake-user {:folder "foo:bar"})
+           (fake-subject-privileges)))))
+
 (deftest test-get-folder-name-prefix
   (is (= (c/get-folder-name-prefix (create-fake-client))
          (format "iplant:de:%s" fake-env))))

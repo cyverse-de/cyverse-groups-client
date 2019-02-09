@@ -101,6 +101,9 @@
   (list-subject-groups [_ user subject] [_ user subject params]
     "Lists groups that a subject belongs to.")
 
+  (list-subject-privileges [_ user subject] [_ user subject params]
+    "Lists privileges that have been granted to a subject.")
+
   (get-folder-name-prefix [_]
     "Returns the folder name prefix for the environment.")
 
@@ -338,6 +341,16 @@
     (:body (http/get (build-url base-url "subjects" subject "groups")
                      {:query-params {:user user :folder folder}
                       :as           :json})))
+
+  (list-subject-privileges [self user subject]
+    (list-subject-privileges self user subject {}))
+
+  (list-subject-privileges [self user subject params]
+    (let [accepted-params [:inheritance-level :entity-type :folder]]
+      (:body (http/get (build-url base-url "subjects" subject "privileges")
+                       {:query-params (merge {:user user}
+                                             (remove-vals nil? (select-keys params accepted-params)))
+                        :as           :json}))))
 
   (get-folder-name-prefix [_]
     (folder-name-prefix environment-name))
