@@ -1,4 +1,4 @@
-(defproject org.cyverse/cyverse-groups-client "0.1.7"
+(defproject org.cyverse/cyverse-groups-client "0.1.8-SNAPSHOT"
   :description "A Clojure client library for the CyVerse groups service."
   :url "https://github.com/cyverse-de/cyverse-groups-client"
   :license {:name "BSD"
