@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file. This change
 of [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- A new function `list-subject-privileges` that can be used to list privileges granted to a subject.
 
 ## [0.1.6]
 ### Added
