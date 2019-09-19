@@ -98,7 +98,7 @@
   (get-subject [_ user subject]
     "Retrieves information about a subject.")
 
-  (list-subject-groups [_ user subject] [_ user subject params]
+  (list-subject-groups [_ user subject details] [_ user subject details params]
     "Lists groups that a subject belongs to.")
 
   (list-subject-privileges [_ user subject] [_ user subject params]
@@ -333,14 +333,14 @@
                      {:query-params {:user user}
                       :as           :json})))
 
-  (list-subject-groups [_ user subject]
+  (list-subject-groups [_ user subject details]
     (:body (http/get (build-url base-url "subjects" subject "groups")
-                     {:query-params {:user user}
+                     {:query-params (remove-vals nil? {:user user :details details})
                       :as           :json})))
 
-  (list-subject-groups [_ user subject folder]
+  (list-subject-groups [_ user subject details folder]
     (:body (http/get (build-url base-url "subjects" subject "groups")
-                     {:query-params {:user user :folder folder}
+                     {:query-params (remove-vals nil? {:user user :details details :folder folder})
                       :as           :json})))
 
   (list-subject-privileges [self user subject]

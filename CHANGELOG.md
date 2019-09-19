@@ -5,6 +5,7 @@ of [keepachangelog.com](http://keepachangelog.com/).
 ## [0.1.8]
 ### Added
 - Support for the optional `details` parameter in `find-groups`.
+- Support for the optional `details` parameter in `list-subject-groups`.
 
 ## [0.1.7]
 ### Added

@@ -412,14 +412,14 @@
            fake-subject))))
 
 (deftest test-subject-group-listing
-  (with-fake-routes {(fake-query-url {:user fake-user} "subjects" fake-user "groups") {:get (success-fn fake-groups)}}
-    (is (= (c/list-subject-groups (create-fake-client) fake-user fake-user)
+  (with-fake-routes {(fake-query-url {:user fake-user :details details} "subjects" fake-user "groups") {:get (success-fn fake-groups)}}
+    (is (= (c/list-subject-groups (create-fake-client) fake-user fake-user details)
            fake-groups))))
 
 (deftest test-subject-folder-group-listing
-  (with-fake-routes {(fake-query-url {:user fake-user :folder fake-folder} "subjects" fake-user "groups")
+  (with-fake-routes {(fake-query-url {:user fake-user :details details :folder fake-folder} "subjects" fake-user "groups")
                      {:get (success-fn fake-groups)}}
-    (is (= (c/list-subject-groups (create-fake-client) fake-user fake-user fake-folder)
+    (is (= (c/list-subject-groups (create-fake-client) fake-user fake-user details fake-folder)
            fake-groups))))
 
 (defn- fake-subject-privileges []
