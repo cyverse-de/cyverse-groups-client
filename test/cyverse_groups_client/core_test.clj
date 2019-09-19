@@ -18,6 +18,7 @@
 (def fake-user "ekaf")
 (def search-term "e")
 (def fake-folder "foo:bar")
+(def details true)
 
 (defn- fake-url [& components]
   (str (apply curl/url fake-base-url (mapv curl/url-encode components))))
@@ -194,13 +195,13 @@
 (def ^:private fake-group (get-in fake-groups [:groups 0]))
 
 (deftest test-find-groups
-  (let [query {:user fake-user :search search-term}]
+  (let [query {:user fake-user :search search-term :details details}]
     (with-fake-routes {(fake-query-url query "groups") {:get (success-fn fake-groups)}}
-      (is (= (c/find-groups (create-fake-client) fake-user search-term)
+      (is (= (c/find-groups (create-fake-client) fake-user details search-term)
              fake-groups))))
-  (let [query {:user fake-user :search search-term :folder fake-folder}]
+  (let [query {:user fake-user :search search-term :details details :folder fake-folder}]
     (with-fake-routes {(fake-query-url query "groups") {:get (success-fn fake-groups)}}
-      (is (= (c/find-groups (create-fake-client) fake-user search-term fake-folder)
+      (is (= (c/find-groups (create-fake-client) fake-user details search-term fake-folder)
              fake-groups)))))
 
 (defn- create-fake-group [{:keys [name type description]}]

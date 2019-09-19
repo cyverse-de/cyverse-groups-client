@@ -36,7 +36,7 @@
   (grant-folder-privilege [_ user name subject privilege]
     "Grants folder privileges to a subject.")
 
-  (find-groups [_ user search] [_ user search folder]
+  (find-groups [_ user details search ] [_ user details search folder]
     "Searches for groups by name.")
 
   (add-group [_ user name type description]
@@ -192,13 +192,14 @@
                      {:query-params {:user user}
                       :as           :json})))
 
-  (find-groups [self user search]
-    (find-groups self user search nil))
+  (find-groups [self user details search]
+    (find-groups self user details search nil))
 
-  (find-groups [_ user search folder]
+  (find-groups [_ user details search folder]
     (:body (http/get (build-url base-url "groups")
                      {:query-params (remove-vals nil? {:user   user
                                                        :search search
+                                                       :details details
                                                        :folder folder})
                       :as           :json})))
 

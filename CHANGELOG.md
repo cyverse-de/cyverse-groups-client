@@ -2,7 +2,11 @@
 All notable changes to this project will be documented in this file. This change log follows the conventions
 of [keepachangelog.com](http://keepachangelog.com/).
 
-## [Unreleased]
+## [0.1.8]
+### Added
+- Support for the optional `details` parameter in `find-groups`.
+
+## [0.1.7]
 ### Added
 - A new function `list-subject-privileges` that can be used to list privileges granted to a subject.
 
