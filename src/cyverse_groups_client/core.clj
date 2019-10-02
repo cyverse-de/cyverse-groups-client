@@ -36,7 +36,7 @@
   (grant-folder-privilege [_ user name subject privilege]
     "Grants folder privileges to a subject.")
 
-  (find-groups [_ user search] [_ user search folder]
+  (find-groups [_ user details search ] [_ user details search folder]
     "Searches for groups by name.")
 
   (add-group [_ user name type description]
@@ -98,7 +98,7 @@
   (get-subject [_ user subject]
     "Retrieves information about a subject.")
 
-  (list-subject-groups [_ user subject] [_ user subject params]
+  (list-subject-groups [_ user subject details] [_ user subject details params]
     "Lists groups that a subject belongs to.")
 
   (list-subject-privileges [_ user subject] [_ user subject params]
@@ -192,13 +192,14 @@
                      {:query-params {:user user}
                       :as           :json})))
 
-  (find-groups [self user search]
-    (find-groups self user search nil))
+  (find-groups [self user details search]
+    (find-groups self user details search nil))
 
-  (find-groups [_ user search folder]
+  (find-groups [_ user details search folder]
     (:body (http/get (build-url base-url "groups")
                      {:query-params (remove-vals nil? {:user   user
                                                        :search search
+                                                       :details details
                                                        :folder folder})
                       :as           :json})))
 
@@ -332,14 +333,14 @@
                      {:query-params {:user user}
                       :as           :json})))
 
-  (list-subject-groups [_ user subject]
+  (list-subject-groups [_ user subject details]
     (:body (http/get (build-url base-url "subjects" subject "groups")
-                     {:query-params {:user user}
+                     {:query-params (remove-vals nil? {:user user :details details})
                       :as           :json})))
 
-  (list-subject-groups [_ user subject folder]
+  (list-subject-groups [_ user subject details folder]
     (:body (http/get (build-url base-url "subjects" subject "groups")
-                     {:query-params {:user user :folder folder}
+                     {:query-params (remove-vals nil? {:user user :details details :folder folder})
                       :as           :json})))
 
   (list-subject-privileges [self user subject]
