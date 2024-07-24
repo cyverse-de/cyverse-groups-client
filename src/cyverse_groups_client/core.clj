@@ -124,7 +124,7 @@
 
 (defn- validate-privilege [type valid-privileges privilege]
   (when-not (contains? valid-privileges (keyword privilege))
-    (throw (IllegalArgumentException. (invalid-privilege-msg type valid-privileges privilege)))))
+    (throw (IllegalArgumentException. ^String (invalid-privilege-msg type valid-privileges privilege)))))
 
 (def ^:private validate-folder-privilege (partial validate-privilege "folder" valid-folder-privileges))
 
